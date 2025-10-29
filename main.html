@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Untitled Clicker Game</title>
+    <link rel="icon" href="images/favicon.png" type="image/png">
+    <link rel="stylesheet" href="style.css" type="text/css">
+
+
+    <audio id="upgrade_sound">
+      <source src="sounds/upgrade.mp3" type="audio/mpeg">
+    </audio>
+  </head>
+
+  <body>
+    <div class="main_div" style="margin-top: 6vh;">
+      <p id="money">$0</p>
+      <p id="money_per_click">per click: $1</p>
+      <p id="money_per_second">per second: $0</p>
+    </div>
+
+    <form>
+      <div class="main_div" style="margin-top: 2vh;">
+        <button class="money_button" type="button" onclick="money_button_clicked()">Click!</button>
+      </div>
+    </form>
+
+    <div class="power_line" id="power_line" style="display: none;">
+
+    </div>
+
+    <div class="side_bar_div">
+      <button
+      class="side_bar_button"
+      type="button"
+      onclick="open_achievements()"
+      data-title="achievements"
+      >Achievements</button>
+      <button class="side_bar_button" type="button"></button>
+    </div>
+
+    <div id="achievements_div">
+      <p style="font-size: 6vh; margin-top: 2vh;">--Achievements--</p>
+      <div id="achievements">
+
+      </div>
+    </div>
+
+    <div class="upgrades_div" id="upgrades_div">
+      <p style="font-size: 6vh; margin: 2vh 0 1vh 0;">--Upgrades--</p>
+
+      <template id="upgrade_button_div_template">
+        <div class="upgrade_button_div">
+          <button
+          class="upgrade_button"
+          id = "upgrade_button"
+          type="button"
+          onclick="upgrade('cursorI')"
+          data-title="???"
+          data-sub="???"
+          data-effect="money per click +1"
+          >
+            <div class="upgrade_button_text">
+              <img class="upgrade_image" src="images/upgrades/cursorI.png" alt="">
+              <p class="upgrade_name" id="upgrade_name">???</p>
+              <p class="upgrade_cost" id="upgrade_cost">$20</p>
+              <p class="upgrade_level" id="upgrade_level">0<span style="font-size: 3vh">/100</span></p>
+              <p class="upgrade_ascension" id="upgrade_ascension">Ascension!</p>
+            </div>
+          </button>
+        </div>
+      </template>
+    </div>
+
+    <div id="tooltip">
+      <div class="title"></div>
+      <div class="desc"></div>
+      <div class="sub"></div>
+      <div class="effect"></div>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>
