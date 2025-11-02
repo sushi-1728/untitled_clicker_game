@@ -49,16 +49,24 @@ img {
   object-fit: contain;
 }
 
-#money {
+#coins {
   font-size: 12.5vh
 }
 
-#money_per_click {
+#coins_per_click {
   font-size: 5vh
 }
 
-#money_per_second {
+#coins_per_second {
   font-size: 5vh
+}
+
+.emoji {
+  width: .6em;           /* フォントサイズに比例して変化 */
+  height: .6em;
+  margin: .2em;
+  vertical-align: -.2em;  /* 行の高さに自然に合わせる */
+  font-size: inherit;
 }
 
 .main_div {
@@ -121,7 +129,7 @@ img {
   height: 10vh;
 }
 
-#achievements_div {
+.side_div {
   background: #000D;
   margin: 0;
   position: absolute;
@@ -132,6 +140,50 @@ img {
   overflow: auto;
   transition: left .5s ease;
   z-index: 65534;
+}
+
+.side_div > * {
+  margin: 1vh;
+}
+
+#statistics_div {
+  text-align: left;
+  width: 45vh;
+  padding: 0 5vh 0 5vh;
+}
+
+#statistics_div > p {
+  margin: .5vh;
+  text-align: left;
+  font-size: 3vh;
+}
+
+#save_button {
+  background-image: url("./images/buttons/sidebar.png");
+  background-position: bottom center;
+  font-size: 4vh;
+  width: 18vh;
+  height: 6vh;
+}
+
+#reset_button {
+  background-image: url("./images/buttons/sidebar.png");
+  background-position: bottom center;
+  color: #F00;
+  font-size: 3vh;
+  margin-bottom: 0;
+  width: 18vh;
+  height: 6vh;
+}
+
+progress {
+  all: revert;
+  font-size: 1.8vh;
+}
+
+.stats_title {
+  color: #CCC;
+  font-size: 2vh;
 }
 
 #achievements {
@@ -164,27 +216,32 @@ img {
 }
 
 .upgrade_button_div {
-  height: 13vh;
   margin: auto;
   margin-bottom: 1vh;
+  position: relative;
+  width: 50vh;
+  height: 13vh;
   display: none;
 }
 
-.upgrade_button {
+.upgrade_button_div > button {
   background-image: url("./images/buttons/upgrade.png");
   background-position: bottom center;
   font-size: 7.5vh;
+  padding-bottom: 2.5vh;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 50vh;
   height: 13vh;
-  margin-top: 0vh;
-  padding-bottom: 2.5vh;
 }
 
-.upgrade_button:active {
+.upgrade_button_div > button:active {
   background-image: url("./images/buttons/upgrade-active.png");
-  height: 10.5vh;
-  margin-top: 2.5vh;
   padding-bottom: 0vh;
+  position: absolute;
+  top: 2.5vh;
+  height: 10.5vh;
 }
 
 .upgrade_button_text {
@@ -220,7 +277,6 @@ img {
   top: 2vh;
   left: 10.5vh;
   font-size: 5vh;
-  display: none;
 }
 
 .upgrade_image {
@@ -230,7 +286,6 @@ img {
   position: absolute;
   top: 1.5vh;
   left: 1vh;
-  filter: brightness(0);
 }
 
 

@@ -1,25 +1,79 @@
-let money = 0;
-let money_per_click = 1;
-let money_per_second = 0;
-let money_earned = 0;
-let ascensions = 0;
+//コード(汚物)
+
+let coins = 0;
+let coins_per_click = 1;    //後に計算
+let coins_per_second = 0;   //後に計算
+let coins_earned = 0;
+let ascensions = 0;         //後に計算
+let upgrades_level = {};
+
+function isRealNumber(value) {
+  return typeof value === "number" && !Number.isNaN(value);
+}
+
+if (localStorage.getItem("save_data")) {
+  const save_data = JSON.parse(localStorage.getItem("save_data"))
+  if (isRealNumber(save_data["coins"]) && save_data["coins"] >= 0) coins = save_data["coins"];
+  if (isRealNumber(save_data["coins_earned"]) && save_data["coins_earned"] >= 0) coins_earned = save_data["coins_earned"];
+  if (save_data["upgrades_level"]) upgrades_level = save_data["upgrades_level"];
+  console.log(save_data["upgrades_level"])
+}
 
 const suffixes = [
-"", "", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No",
-"Dc", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod",
-"Vg", "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Novg",
-"Tg", "Utg", "Dtg", "Ttg", "Qatg", "Qitg", "Sxtg", "Sptg", "Octg", "Notg",
-"Qag", "Uqag", "Dqag", "Tqag", "Qaqag", "Qiqag", "Sxqag", "Spqag", "Ocqag", "Noqag",
-"Qig", "Uqig", "Dqig", "Tqig", "Qaqig", "Qiqig", "Sxqig", "Spqig", "Ocqig", "Noqig",
-
+  "", "", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No",
+  "Dc", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod",
+  "Vg", "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Novg",
+  "Tg", "Utg", "Dtg", "Ttg", "Qatg", "Qitg", "Sxtg", "Sptg", "Octg", "Notg",
+  "Qag", "Uqag", "Dqag", "Tqag", "Qaqag", "Qiqag", "Sxqag", "Spqag", "Ocqag", "Noqag",
+  "Qig", "Uqig", "Dqig", "Tqig", "Qaqig", "Qiqig", "Sxqig", "Spqig", "Ocqig", "Noqig",
 ]
 
-function FormatNumber(num, floor) { //12,345,678
+let upgrades = {
+  "cursor_I"  : {"title": "Cursor I"   , "sub": "More clicks!"        , "effect": "", "cost":     20, "mpc":  .5, "mps":    0},
+  "finger"    : {"title": "Finger"     , "sub": "First auto click"    , "effect": "", "cost":    250, "mpc":   0, "mps":    3},
+  "cursor_II" : {"title": "Cursor II"  , "sub": "Golden!"             , "effect": "", "cost":   1500, "mpc":  15, "mps":    0},
+  "hydropower": {"title": "Hydropower" , "sub": "The power of water"  , "effect": "", "cost":   8000, "mpc":   0, "mps":   80},
+  "pyropower" : {"title": "Pyropower"  , "sub": "Fire!!!"             , "effect": "", "cost":  50000, "mpc":   0, "mps":  400},
+  "cursor_III": {"title": "Cursor III" , "sub": "Shiny emerald"       , "effect": "", "cost": 100000, "mpc": 750, "mps":    0},
+  "solarpower": {"title": "Solarpower" , "sub": "Massive solar panels", "effect": "", "cost": 600000, "mpc":   0, "mps": 4500},
+};
+
+for (const upgrade_name in upgrades) {
+  let effect = ""; //エフェクトを自動設定
+  if (upgrades[upgrade_name]["mpc"] != 0) {
+    if (effect != "") effect += "<br>";
+    effect += "coins/click +" + FormatNumber(upgrades[upgrade_name]["mpc"], false, 3);
+  }
+  if (upgrades[upgrade_name]["mps"] != 0) {
+    if (effect != "") effect += "<br>";
+    effect += "coins/sec +" + FormatNumber(upgrades[upgrade_name]["mps"], false, 3);
+  }
+  upgrades[upgrade_name]["effect"] = effect
+
+  if (!upgrades_level[upgrade_name]) upgrades_level[upgrade_name] = {"level": 0, "ascensions": 0}; //upgrades_levelを自動設定
+
+  upgrades[upgrade_name]["cost"] *= 1.125**(upgrades_level[upgrade_name]["level"] + upgrades_level[upgrade_name]["ascensions"] + 12.5 * upgrades_level[upgrade_name]["ascensions"] * (upgrades_level[upgrade_name]["ascensions"] + 3));
+}
+
+let achievements = {
+  // 0: 解除済み?, 1: 条件, 2: title, 3: desc
+  "1_coin"  : [false, () => (coins_earned >= 1)    , "First Step", "Earn 1 coin"  ],
+  "1k_coins": [false, () => (coins_earned >= 10**3), "Tiny Rich" , "Earn 1k coins"],
+  "1M_coins": [false, () => (coins_earned >= 10**6), "Mega Bucks", "Earn 1M coins"],
+};
+
+//Star Buyer
+//Galaxy Cash
+//Cosmic King
+//Infinite Rich
+//Multiverse Cash
+
+function FormatNumber(num, floor, dig) { //12,345,678
   let digits = Math.floor(Math.log10(num));  //7
   let index = Math.floor(digits / 3);        //2
 
   if (index >= 2) {
-    return (Math.floor(num / 10**(digits - 2)) / 10**(2 - (digits - index * 3))) + suffixes[index]; //12.3 + "M"
+    return (Math.floor(num / 10**(digits - (dig - 1))) / 10**((dig - 1) - (digits - index * 3))) + suffixes[index]; //12.3 + "M"
   } else if (digits < 3 && !floor) {
     return Math.floor(num * 10) / 10;
   } else {
@@ -27,18 +81,22 @@ function FormatNumber(num, floor) { //12,345,678
   }
 }
 
-const html_money = document.getElementById("money");
-const html_money_per_click = document.getElementById("money_per_click");
-const html_money_per_second = document.getElementById("money_per_second");
+const html_coins = document.getElementById("coins");
+const html_coins_per_click = document.getElementById("coins_per_click");
+const html_coins_per_second = document.getElementById("coins_per_second");
+const html_stats_coins = document.getElementById("stats_coins");
+const html_stats_coins_earned = document.getElementById("stats_coins_earned");
+const html_stats_coins_per_click = document.getElementById("stats_coins_per_click");
+const html_stats_coins_per_second = document.getElementById("stats_coins_per_second");
 
 const html_power_line = document.getElementById("power_line");
 
-function money_button_clicked() {
-  money += money_per_click;
-  money_earned += money_per_click;
-  html_money.textContent = "$" + FormatNumber(Math.floor(money), true);
+function money_button_clicked() { //ぼたんぽちっ！
+  coins += coins_per_click;
+  coins_earned += coins_per_click;
+  html_coins.innerHTML = '<img src="images/emojis/coin.png" alt="$" class="emoji">' + FormatNumber(Math.floor(coins), true, 3);
 
-
+  let a=`
   const img = document.createElement("img");
   img.src = "images/buttons/power.png";
   img.className = "power"
@@ -56,141 +114,121 @@ function money_button_clicked() {
       html_power_line.removeChild(img);
       }
     }, 20);
+    `
 };
 
-let upgrades = {
-  // 0: title, 1: sub, 2: effect, 3: level, 4: cost, 5:ascensions 6: +mpc, 7: +mps
-  "cursor_I": ["Cursor I", "More clicks!", "", 0, 20, 0, 0.5, 0],
-  "finger": ["Finger", "First auto click", "", 0, 250, 0, 0, 3],
-  "cursor_II": ["Cursor II", "Golden!", "", 0, 1500, 0, 15, 0],
-  "hydropower": ["Hydropower", "The power of water", "", 0, 8000, 0, 0, 80],
-  "pyropower": ["Pyropower", "Fire!!!", "", 0, 50000, 0, 0, 400],
-  "cursor_III": ["Cursor III", "Shiny emerald", "", 0, 100000, 0, 750, 0],
-  "solarpower": ["Solarpower", "Massive solar panels", "", 0, 600000, 0, 0, 4500],
-};
-
-for (const upgrade_name in upgrades) {
-    let effect = "";
-    if (upgrades[upgrade_name][6] != 0) {
-      if (effect != "") effect += "<br>";
-      effect += "money/click +" + FormatNumber(upgrades[upgrade_name][6], false);
-    }
-    if (upgrades[upgrade_name][7] != 0) {
-      if (effect != "") effect += "<br>";
-      effect += "money/sec +" + FormatNumber(upgrades[upgrade_name][7], false);
-    }
-    upgrades[upgrade_name][2] = effect
+function open_side_div(div_name) {
+  const div = document.getElementById(div_name + "_div")
+  const opened = (div.style.left == "30vh")
+  document.querySelectorAll(".side_div").forEach(element => {
+    element.style.left = "-25vh";
+  });
+  if (!opened) div.style.left = "30vh";
 }
 
 const html_upgrades_div = document.getElementById("upgrades_div");
 const html_upgrade_button_div_template = document.getElementById("upgrade_button_div_template");
 
-//create upgrade buttons
-for (const upgrade_name in upgrades) {
+for (const upgrade_name in upgrades) { //あっぷぐれーどのUIつくる
   const upgrade_button_div = html_upgrade_button_div_template.content.querySelector(".upgrade_button_div").cloneNode(true);
   html_upgrades_div.appendChild(upgrade_button_div);
-  upgrade_button_div.id = upgrade_name + "_button_div"
+  upgrade_button_div.id = upgrade_name + "_upgrade_button_div"
   if (upgrade_name == "cursor_I" || upgrade_name == "finger" ) upgrade_button_div.style.display = "block";
 
   const upgrade_button = upgrade_button_div.querySelector(".upgrade_button");
   upgrade_button.onclick = () => upgrade(upgrade_name);
-  upgrade_button.id = upgrade_name + "_button";
-  upgrade_button.dataset.effect = upgrades[upgrade_name][2];
+  upgrade_button.id = upgrade_name + "_upgrade_button";
+  upgrade_button.dataset.effect = upgrades[upgrade_name]["effect"];
 
   const upgrade_button_text = upgrade_button.querySelector(".upgrade_button_text");
-
   upgrade_button_text.querySelector(".upgrade_image").src = `images/upgrades/${upgrade_name}.png`;
-  upgrade_button_text.querySelector(".upgrade_image").id = upgrade_name + "_image"
-  upgrade_button_text.querySelector(".upgrade_name").id = upgrade_name + "_name";
-  upgrade_button_text.querySelector(".upgrade_cost").id = upgrade_name + "_cost";
-  upgrade_button_text.querySelector(".upgrade_level").id = upgrade_name + "_level";
-  upgrade_button_text.querySelector(".upgrade_ascension").id = upgrade_name + "_ascension";
+  upgrade_button_text.querySelector(".upgrade_image").id = upgrade_name + "_upgrade_image"
+  upgrade_button_text.querySelector(".upgrade_name").id = upgrade_name + "_upgrade_name";
+  upgrade_button_text.querySelector(".upgrade_cost").id = upgrade_name + "_upgrade_cost";
+  upgrade_button_text.querySelector(".upgrade_level").id = upgrade_name + "_upgrade_level";
+
+  const ascension_button = upgrade_button_div.querySelector(".ascension_button");
+  ascension_button.onclick = () => ascension(upgrade_name);
+  ascension_button.id = upgrade_name + "_ascension_button";
+
+  const ascension_button_text = ascension_button.querySelector(".upgrade_button_text");
+  ascension_button_text.querySelector(".upgrade_image").src = `images/upgrades/${upgrade_name}.png`;
+  ascension_button_text.querySelector(".upgrade_level").id = upgrade_name + "_ascension_level";
 }
 
-//upgrade
-function upgrade(upgrade_name) {
-  if (upgrades[upgrade_name][3] == upgrades[upgrade_name][5] * 25 + 50) { //ascension
-    upgrades[upgrade_name][5] ++;
-    upgrades[upgrade_name][3] = 0;
-    upgrades[upgrade_name][4] *= 1.125;
+for (const upgrade_name in upgrades) {
+  document.getElementById(upgrade_name + "_upgrade_button").style.display = "block";
+  document.getElementById(upgrade_name + "_ascension_button").style.display = "none";
 
-    document.getElementById(upgrade_name + "_name").style.display = "block";
-    document.getElementById(upgrade_name + "_cost").style.display = "block";
-    document.getElementById(upgrade_name + "_ascension").style.display = "none";
-    document.getElementById(upgrade_name + "_button").dataset.title = upgrades[upgrade_name][0];
-    document.getElementById(upgrade_name + "_button").dataset.sub = upgrades[upgrade_name][1];
-    document.getElementById(upgrade_name + "_button").dataset.effect = upgrades[upgrade_name][2];
-  } else {
-    if (upgrades[upgrade_name][4] <= money) {
-      upgrades[upgrade_name][3] ++;
-      money -= upgrades[upgrade_name][4];
-      upgrades[upgrade_name][4] *= 1.125;
+  if (upgrades_level[upgrade_name]["level"] == upgrades_level[upgrade_name]["ascensions"] * 25 + 50) {
+    document.getElementById(upgrade_name + "_upgrade_button").style.display = "none";
+    document.getElementById(upgrade_name + "_ascension_button").style.display = "block";
+  }
 
-      document.getElementById("upgrade_sound").play();
+  console.log((upgrades_level[upgrade_name]["level"] != 0 || upgrades_level[upgrade_name]["ascensions"] != 0))
+  if (upgrades_level[upgrade_name]["level"] != 0 || upgrades_level[upgrade_name]["ascensions"] != 0) {
+  document.getElementById(upgrade_name + "_upgrade_button").dataset.title = upgrades[upgrade_name]["title"];
+  document.getElementById(upgrade_name + "_upgrade_button").dataset.sub = upgrades[upgrade_name]["sub"];
+  document.getElementById(upgrade_name + "_upgrade_name").textContent = upgrades[upgrade_name]["title"];
+  document.getElementById(upgrade_name + "_upgrade_image").style.filter = "brightness(1)";
+    const keys = Object.keys(upgrades);
+    if (keys[keys.indexOf(upgrade_name) + 1])
+      document.getElementById(keys[keys.indexOf(upgrade_name) + 1] + "_upgrade_button_div").style.display = "block";
+    if (keys[keys.indexOf(upgrade_name) + 2])
+      document.getElementById(keys[keys.indexOf(upgrade_name) + 2] + "_upgrade_button_div").style.display = "block";
+  }
+}
 
-      if (upgrades[upgrade_name][3] == upgrades[upgrade_name][5] * 25 + 50) { //show "Ascension!"
-        document.getElementById(upgrade_name + "_name").style.display = "none";
-        document.getElementById(upgrade_name + "_cost").style.display = "none";
-        document.getElementById(upgrade_name + "_ascension").style.display = "block";
-        document.getElementById(upgrade_name + "_button").dataset.title = "Ascension";
-        document.getElementById(upgrade_name + "_button").dataset.sub = "Reset for money";
-        document.getElementById(upgrade_name + "_button").dataset.effect = "level => 0<br>money per click *1.5<br>money per second *1.5"
-      } else { //hide "Ascension!"
-        const keys = Object.keys(upgrades);
-        document.getElementById(upgrade_name + "_name").textContent = upgrades[upgrade_name][0];
-        document.getElementById(upgrade_name + "_image").style.filter = "brightness(1)";
-        if (keys[keys.indexOf(upgrade_name) + 1])
-          document.getElementById(keys[keys.indexOf(upgrade_name) + 1] + "_button_div").style.display = "block";
-        if (keys[keys.indexOf(upgrade_name) + 2])
-          document.getElementById(keys[keys.indexOf(upgrade_name) + 2] + "_button_div").style.display = "block";
-        document.getElementById(upgrade_name + "_button").dataset.title = upgrades[upgrade_name][0];
-        document.getElementById(upgrade_name + "_button").dataset.sub = upgrades[upgrade_name][1];
-        document.getElementById(upgrade_name + "_button").dataset.effect = upgrades[upgrade_name][2];
-      }
+
+function upgrade(upgrade_name) { //あっぷぐれーど
+  if (upgrades[upgrade_name]["cost"] <= coins) {
+    if (upgrades_level[upgrade_name]["level"] == 0 && upgrades_level[upgrade_name]["ascensions"] == 0) {
+      document.getElementById(upgrade_name + "_upgrade_button").dataset.title = upgrades[upgrade_name]["title"];
+      document.getElementById(upgrade_name + "_upgrade_button").dataset.sub = upgrades[upgrade_name]["sub"];
+      document.getElementById(upgrade_name + "_upgrade_name").textContent = upgrades[upgrade_name]["title"];
+      document.getElementById(upgrade_name + "_upgrade_image").style.filter = "brightness(1)";
+      const keys = Object.keys(upgrades);
+      if (keys[keys.indexOf(upgrade_name) + 1])
+        document.getElementById(keys[keys.indexOf(upgrade_name) + 1] + "_upgrade_button_div").style.display = "block";
+      if (keys[keys.indexOf(upgrade_name) + 2])
+        document.getElementById(keys[keys.indexOf(upgrade_name) + 2] + "_upgrade_button_div").style.display = "block";
+    }
+
+    upgrades_level[upgrade_name]["level"] ++;
+    coins -= upgrades[upgrade_name]["cost"];
+    upgrades[upgrade_name]["cost"] *= 1.125;　//あっぷぐれーどのコスト倍率
+
+    document.getElementById("upgrade_sound").play();
+
+    if (upgrades_level[upgrade_name]["level"] == upgrades_level[upgrade_name]["ascensions"] * 25 + 50) { //"Ascension!"を見せるだけ
+      document.getElementById(upgrade_name + "_upgrade_button").style.display = "none";
+      document.getElementById(upgrade_name + "_ascension_button").style.display = "block";
+    } else { //"Ascension!"を消す、2個先まで見せる
+      document.getElementById(upgrade_name + "_upgrade_button").style.display = "block";
+      document.getElementById(upgrade_name + "_ascension_button").style.display = "none";
     }
   }
 }
 
-// achievements
-let achievements_div = false;
-const html_achievements_div = document.getElementById("achievements_div");
-
-function open_achievements() {
-  achievements_div = !achievements_div;
-  if (achievements_div) {
-    html_achievements_div.style.left = "30vh";
-  } else {
-    html_achievements_div.style.left = "-25svh";
-  }
+function ascension(upgrade_name) {
+  upgrades_level[upgrade_name]["ascensions"] ++;
+  upgrades_level[upgrade_name]["level"] = 0;
+  upgrades[upgrade_name]["cost"] *= 1.125;　//ここだけ変えるのもあり
+  document.getElementById(upgrade_name + "_upgrade_button").style.display = "block";
+  document.getElementById(upgrade_name + "_ascension_button").style.display = "none";
 }
 
 const html_achievements = document.getElementById("achievements");
 
-let achievements = {
-  // 0: unlocked, 1: , 2: title, 3: desc
-  "1_dollar": [false, () => (money_earned >= 1), "First Step", "Earn 1 dollar"],
-  "1k_dollars": [false, () => (money_earned >= 10**3),"Tiny Rich", "Earn 1k dollars"],
-  "1M_dollars": [false, () => (money_earned >= 10**6),"Mega Bucks", "Earn 1M dollars"],
-};
-
-//Star Buyer
-//Galaxy Cash
-//Cosmic King
-//Infinite Rich
-//Multiverse Cash
-
-//create achievement divs
-for (const achievement_name in achievements) {
+for (const achievement_name in achievements) { //実績のUIつくる
   const div = document.createElement("div");
   div.className = "achievement";
   div.id = achievement_name;
-  div.dataset.title = "???";
+  div.dataset.title = "???"; //???
   div.dataset.desc = achievements[achievement_name][3];
   div.style.backgroundImage = `url(\"./images/achievements/${achievement_name}.png\")`
   html_achievements.appendChild(div);
 }
-
-
 
 //tooltip
 const tooltip = document.getElementById("tooltip");
@@ -220,27 +258,27 @@ document.querySelectorAll("[data-title]").forEach(element => {
 
 //tick
 function tick() {
-  money_per_click = 1;
-  money_per_second = 0;
+  coins_per_click = 1;
+  coins_per_second = 0;
   ascensions = 0;
 
   for (const upgrade_name in upgrades) {
-    if (upgrades[upgrade_name][4] <= money) {
-      document.getElementById(upgrade_name + "_cost").style.color = "#0D0";
+    if (upgrades[upgrade_name]["cost"] <= coins) {
+      document.getElementById(upgrade_name + "_upgrade_cost").style.color = "#0D0";
     } else {
-      document.getElementById(upgrade_name + "_cost").style.color = "#D11";
+      document.getElementById(upgrade_name + "_upgrade_cost").style.color = "#D11";
     }
 
-    document.getElementById(upgrade_name + "_cost").textContent = "$" + FormatNumber(upgrades[upgrade_name][4], true);
-    document.getElementById(upgrade_name + "_level").innerHTML = `${FormatNumber(upgrades[upgrade_name][3], false)}<span style="font-size: 3vh;">/${upgrades[upgrade_name][5] * 25 + 50}</span>`;
+    document.getElementById(upgrade_name + "_upgrade_cost").innerHTML = '<img src="images/emojis/coin.png" alt="$" class="emoji">' + FormatNumber(upgrades[upgrade_name]["cost"], true, 3);
+    document.getElementById(upgrade_name + "_upgrade_level").innerHTML = `${FormatNumber(upgrades_level[upgrade_name]["level"], false, 3)}<span style="font-size: 3vh;">/${upgrades_level[upgrade_name]["ascensions"] * 25 + 50}</span>`;
 
-    money_per_click += upgrades[upgrade_name][6] * upgrades[upgrade_name][3];
-    money_per_second += upgrades[upgrade_name][7] * upgrades[upgrade_name][3];
-    ascensions += upgrades[upgrade_name][5];
+    coins_per_click += upgrades[upgrade_name]["mpc"] * upgrades_level[upgrade_name]["level"];
+    coins_per_second += upgrades[upgrade_name]["mps"] * upgrades_level[upgrade_name]["level"];
+    ascensions += upgrades_level[upgrade_name]["ascensions"];
   }
 
-  money_per_click *= 1.5**ascensions;
-  money_per_second *= 1.5**ascensions;
+  coins_per_click *= 1.5**ascensions;
+  coins_per_second *= 1.5**ascensions;
 
   for (const achievement_name in achievements) {
     if (achievements[achievement_name][1]()) {
@@ -261,12 +299,74 @@ function tick() {
     tooltip.style.display = "none";
   }
 
-  money += money_per_second / 20;
-  money_earned += money_per_second / 20;
+  coins += coins_per_second / 20;
+  coins_earned += coins_per_second / 20;
 
-  html_money.textContent = "$" + FormatNumber(money, true);
-  html_money_per_click.textContent = "per click: $" + FormatNumber(money_per_click, false);
-  html_money_per_second.textContent = "per second: $" + FormatNumber(money_per_second, false);
+  html_coins.innerHTML = '<img src="images/emojis/coin.png" alt="$" class="emoji">' + FormatNumber(coins, true, 3);
+  html_coins_per_click.innerHTML = 'per click: <img src="images/emojis/coin.png" alt="$" class="emoji">' + FormatNumber(coins_per_click, false, 3);
+  html_coins_per_second.innerHTML = 'per second: <img src="images/emojis/coin.png" alt="$" class="emoji">' + FormatNumber(coins_per_second, false, 3);
+  html_stats_coins.innerHTML = '<span class="stats_title">coins: </span>' + FormatNumber(coins, false, 5);
+  html_stats_coins_earned.innerHTML = '<span class="stats_title">coins earned: </span>' + FormatNumber(coins_earned, false, 5);
+  html_stats_coins_per_click.innerHTML = '<span class="stats_title">coins per click: </span>' + FormatNumber(coins_per_click, false, 5);
+  html_stats_coins_per_second.innerHTML = '<span class="stats_title">coins per second: </span>' + FormatNumber(coins_per_second, false, 5);
 }
 
 setInterval(tick, 50);
+
+function save() {
+  let new_save_data = {
+    "coins": coins,
+    "coins_earned": coins_earned,
+    "upgrades_level": upgrades_level,
+  };
+  localStorage.setItem("save_data", JSON.stringify(new_save_data));
+  console.log("data saved!")
+}
+
+setInterval(save, 30000)
+
+function reset_data() {
+  var result = confirm("Are you sure want to reset data?? 本当にデータをリセットしても大丈夫?");
+  if (result) {
+    var result = confirm("Are you sure??? 本当に??");
+    if (result) {
+      localStorage.clear();
+      location.reload();
+    }
+  }
+}
+
+const button = document.getElementById("reset_button");
+const bar = document.getElementById("reset_progress_bar");
+let interval;
+
+button.addEventListener("mousedown", startHold);
+button.addEventListener("touchstart", startHold);
+button.addEventListener("mouseup", stopHold);
+button.addEventListener("mouseleave", stopHold);
+button.addEventListener("touchend", stopHold);
+button.addEventListener("touchcancel", stopHold);
+
+
+function startHold() {
+  clearInterval(interval);
+  interval = setInterval(() => {
+    if (bar.value < bar.max) bar.value += .5; // 押してる間は増える
+    else {
+      bar.value = bar.max;
+      reset_data();
+      clearInterval(interval);
+    }
+  }, 30);
+}
+
+function stopHold() {
+  clearInterval(interval);
+  interval = setInterval(() => {
+    if (bar.value > 0) bar.value -= 5; // 離すと減る
+    else {
+      bar.value = 0;
+      clearInterval(interval);
+    }
+  }, 30);
+}
