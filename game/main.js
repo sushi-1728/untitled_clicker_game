@@ -65,9 +65,9 @@ let achievements = {
   "1k_coins"  : [false, () => (coins_earned >= 10**3), "Tiny Rich"      , "Earn 1k coins"         ],
   "1M_coins"  : [false, () => (coins_earned >= 10**6), "Mega Bucks"     , "Earn 1M coins"         ],
   "100_clicks": [false, () => (clicks >= 100)        , "Tiny Tap"       , "Click button 100 times"],
-  "500_clicks": [false, () => (clicks >= 500)        , "Getting Warm"   , "Click button 500 times"],
-  "1k_clicks" : [false, () => (clicks >= 1000)       , "Clicking Frenzy", "Click button 1k times" ],
-  "2k_clicks" : [false, () => (clicks >= 2000)       , "Button Master"  , "Click button 2k times" ],
+  "1k_clicks" : [false, () => (clicks >= 1000)       , "Getting Warm"   , "Click button 1k times" ],
+  "5k_clicks" : [false, () => (clicks >= 5000)       , "Clicking Frenzy", "Click button 5k times" ],
+  "10k_clicks": [false, () => (clicks >= 10000)      , "Button Master"  , "Click button 10k times"],
 };
 
 //Star Buyer
@@ -76,8 +76,8 @@ let achievements = {
 //Infinite Rich
 //Multiverse Cash
 
-//Rapid Tapper     // 5,000 clicks
-//Click Machine    // 10,000 clicks
+//Rapid Tapper     // 20,000 clicks
+//Click Machine    // 50,000 clicks
 //Legendary Clicker// 100,000 clicks
 
 function FormatNumber(num, floor, dig) { //12,345,678
