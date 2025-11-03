@@ -23,6 +23,7 @@
 }
 
 body {
+  overflow: hidden;
   background-color: #333;
   margin: 0;
 }
@@ -364,3 +365,4 @@ progress {
   width: 100%;
   color: #ffcc00;
 }
+
