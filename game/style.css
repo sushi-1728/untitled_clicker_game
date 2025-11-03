@@ -197,7 +197,7 @@ progress {
   width: 5vh;
   height: 5vh;
   margin: .5vh;
-  filter: brightness(.2);
+  filter: brightness(.1);
 }
 
 .achievement:hover {
@@ -364,3 +364,4 @@ progress {
   width: 100%;
   color: #ffcc00;
 }
+
