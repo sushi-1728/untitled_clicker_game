@@ -19,7 +19,7 @@
       <p id="coins_per_second">per second: <img src="images/emojis/coin.png" alt="$" class="emoji">0</p>
     </div>
 
-    <form>
+    <form onkeydown="if(event.key==='Enter'){ event.preventDefault(); }">
       <div class="main_div" style="margin-top: 2vh;">
         <button class="money_button" type="button" onclick="money_button_clicked()">Click!</button>
       </div>
@@ -127,3 +127,4 @@
     <script src="main.js"></script>
   </body>
 </html>
+
